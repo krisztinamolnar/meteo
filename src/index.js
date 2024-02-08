@@ -17,6 +17,7 @@ function refreshWeather(response) {
   humidityElement.innerHTML = `${response.data.temperature.humidity}%`;
   windSpeedElement.innerHTML = `${response.data.wind.speed} km/h`;
   iconElement.innerHTML = `<img src="${response.data.condition.icon_url}" class="weather-app-icon"/>`;
+  getForecast(response.data.city);
 }
 
 function formatDate(date) {
@@ -43,7 +44,7 @@ function formatDate(date) {
 function searchCity(city) {
   let apiKey = "382o0ac2c14btd9435906fb13df381eb";
   let apiUrl = `https://api.shecodes.io/weather/v1/current?query=${city}&key=${apiKey}&units=metric`;
-  console.log(apiUrl);
+
   axios.get(apiUrl).then(refreshWeather);
 }
 
@@ -54,29 +55,46 @@ function handleSearchSubmit(event) {
   searchCity(SearchInput.value);
 }
 
-function displayForecast() {
+function formatDay(timestamp) {
+  let date = new Date(timestamp * 1000);
+  let days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  return days[date.getDay()];
+}
+
+function getForecast(city) {
+  let apiKey = "382o0ac2c14btd9435906fb13df381eb";
+  let apiUrl = `https://api.shecodes.io/weather/v1/forecast?query=${city}&key=${apiKey}&units=metric`;
+  axios(apiUrl).then(displayForecast);
+}
+
+function displayForecast(response) {
   let forecastElement = document.querySelector("#forecast");
 
-  let days = ["Tue", "Wed", "Thu", "Fri", "Sat"];
   let forecastHtml = "";
 
-  days.forEach(function (day) {
-    forecastHtml =
-      forecastHtml +
-      ` <div class="row">
+  response.data.daily.forEach(function (day, index) {
+    if (index < 5) {
+      forecastHtml =
+        forecastHtml +
+        ` <div class="row">
           <div class="col-2">
-            <div class="weather-forecast-date">${day}</div>
-            <img
-              src="http://openweathermap.org/img/wn/50d@2x.png"
-              alt=""
-              width="42"
-            />
+            <div class="weather-forecast-date">${formatDay(day.time)}</div>
+            <div >
+            <img src="${
+              day.condition.icon_url
+            }" class="weather-forecast-icon" />
+            </div>
             <div class="weather-forecast-temperatures">
-              <span class="weather-forecast-temperature-max">18° </span>
-              <span class="weather-forecast-temperature-min">12°</span>
+              <span class="weather-forecast-temperature-max">${Math.round(
+                day.temperature.maximum
+              )}° </span>
+              <span class="weather-forecast-temperature-min">${Math.round(
+                day.temperature.minimum
+              )}°</span>
             </div>
           </div>
         </div>`;
+    }
   });
   forecastElement.innerHTML = forecastHtml;
 }
@@ -85,4 +103,3 @@ let SearchFormElement = document.querySelector("#search-form");
 SearchFormElement.addEventListener("submit", handleSearchSubmit);
 
 searchCity("Vienna");
-displayForecast();
