@@ -46,6 +46,8 @@ header {
 .weather-app-data {
   display: flex;
   justify-content: space-between;
+  margin-left: 15px;
+  margin-right: 15px;
 }
 
 main {
@@ -67,6 +69,7 @@ main {
 
 .weather-app-details strong {
   color: #e84a5f;
+  opacity: 75%;
 }
 
 .weather-app-temperature-container {
